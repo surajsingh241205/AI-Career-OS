@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — AI Career OS{% endblock %}
+
+{% block content %}
+<style>
+    /* Absolute Structural Fix for Fixed Navbar Collision */
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        
+        /* FORCE clearance below fixed nav. 
+           This guarantees it will never sit underneath the navigation layer.
+        */
+        padding-top: 5.5rem; 
+        margin-top: 1rem;
+    }
+
+    /* Welcome Header Layout */
+    .welcome-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 2rem;
+    }
+
+    .welcome-title {
+        font-size: 2.25rem;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        margin-bottom: 0.35rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    /* Metric Grid System */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .metric-card {
+        padding: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card:hover {
+        border-color: var(--text-secondary);
+    }
+
+    .metric-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
+    }
+
+    .metric-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+
+    /* Progress Architecture */
+    .progress-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+
+    .progress-title {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .progress-percentage {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .progress-track {
+        width: 100%;
+        height: 8px;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 68%; 
+        background-color: var(--text-primary);
+        border-radius: 9999px;
+        transition: width 1s ease-in-out;
+    }
+
+    /* Main Console Split View */
+    .console-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .console-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .panel-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+    }
+
+    /* Modern Minimalist Timeline Activity Styling */
+    .activity-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+    }
+
+    .timeline-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+        position: relative;
+    }
+
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 0.5rem;
+        bottom: 0.5rem;
+        width: 1px;
+        background-color: var(--border-color);
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 1.5rem;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: 2px;
+        top: 0.5rem;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: var(--text-secondary);
+    }
+
+    .timeline-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .timeline-text {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        font-weight: 400;
+    }
+
+    .timeline-timestamp {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-family: monospace;
+    }
+
+    /* Quick Action Interfaces */
+    .actions-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .action-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .action-link:hover {
+        background-color: var(--subtle-gray);
+        border-color: var(--text-secondary);
+        transform: translateX(2px);
+    }
+
+    .action-link svg {
+        color: var(--text-secondary);
+        transition: var(--transition);
+    }
+
+    .action-link:hover svg {
+        color: var(--text-primary);
+    }
+
+    /* Modular Expansion Templates (Future Ready Layers) */
+    .expansion-placeholder {
+        opacity: 0.35;
+        border: 1px dashed var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        background-color: rgba(var(--bg-secondary), 0.5);
+    }
+
+    .expansion-text {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-align: center;
+    }
+
+    /* Responsive Adapters */
+    @media (max-width: 912px) {
+        .console-grid {
+            grid-template-columns: 1fr;
+        }
+        .welcome-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+        .welcome-action-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    
+    <header class="welcome-header">
+        <div>
+            <h1 class="welcome-title">Welcome, {{ user.name if user else 'Suraj Singh' }}</h1>
+            <p class="welcome-subtitle">Workspace calibrated. Review your career analytics telemetry below.</p>
+        </div>
+        <a href="#upload-resume" class="btn btn-primary welcome-action-btn">Upload Resume</a>
+    </header>
+
+    <section class="metrics-grid">
+        <div class="card metric-card">
+            <div class="metric-label">Applications</div>
+            <div class="metric-value">12</div>
+        </div>
+        <div class="card metric-card">
+            <div class="metric-label">Interviews</div>
+            <div class="metric-value">3</div>
+        </div>
+        <div class="card metric-card">
+            <div class="metric-label">Resume Score</div>
+            <div class="metric-value">84</div>
+        </div>
+        <div class="card metric-card">
+            <div class="metric-label">Skills Tracked</div>
+            <div class="metric-value">9</div>
+        </div>
+    </section>
+
+    <section class="card progress-section">
+        <div class="progress-header">
+            <span class="progress-title">Target Vector Alignment</span>
+            <span class="progress-percentage">68%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-bar"></div>
+        </div>
+    </section>
+
+    <div class="console-grid">
+        
+        <div class="console-panel">
+            <h2 class="panel-title">Recent Activity</h2>
+            <div class="activity-card">
+                <div class="timeline-container">
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background-color: var(--text-primary);"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-text">System Initialization Completed</span>
+                            <span class="timeline-timestamp">JUST NOW</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-text">Resume baseline index analyzed (Score: 84)</span>
+                            <span class="timeline-timestamp">2 HOURS AGO</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-text">Added "Senior Frontend Engineer" application status loop</span>
+                            <span class="timeline-timestamp">YESTERDAY</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="panel-title" style="margin-top: 0.5rem;">AI Career Coach Pipeline</h2>
+            <div class="expansion-placeholder">
+                <p class="expansion-text">Module integration pending system initialization</p>
+            </div>
+        </div>
+
+        <div class="console-panel">
+            <h2 class="panel-title">Quick Actions</h2>
+            <div class="actions-stack">
+                <a href="#analyze" class="action-link">
+                    <span>Analyze Resume Blueprint</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#interview" class="action-link">
+                    <span>Generate Interview Simulation</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#roadmaps" class="action-link" style="opacity: 0.6;">
+                    <span>Request Skill Roadmap Delta</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

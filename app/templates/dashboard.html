@@ -270,7 +270,7 @@
             <h1 class="welcome-title">Welcome, {{ user.name if user else 'Suraj Singh' }}</h1>
             <p class="welcome-subtitle">Workspace calibrated. Review your career analytics telemetry below.</p>
         </div>
-        <a href="#upload-resume" class="btn btn-primary welcome-action-btn">Upload Resume</a>
+        <a href="{{ url_for('auth.upload_resume') }}" class="btn btn-primary welcome-action-btn">Upload Resume</a>
     </header>
 
     <section class="metrics-grid">
@@ -292,6 +292,75 @@
         </div>
     </section>
 
+<div class="console-panel">
+    <h2 class="panel-title">My Resumes</h2>
+
+```
+{% if resumes %}
+    <div class="actions-stack" style="gap: 1rem;">
+        {% for resume in resumes %}
+            <div class="action-link" style="cursor: default; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem;">
+
+                <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; padding-right: 1rem;">
+
+                    <span class="timeline-text"
+                          style="font-weight: 500; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ resume.file_name }}
+                    </span>
+
+                    <span class="timeline-timestamp" style="opacity: 0.6;">
+                        Uploaded on {{ resume.uploaded_at.strftime('%d %b %Y') }}
+                    </span>
+
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; flex-shrink: 0;">
+
+                    <a href="{{ url_for('auth.view_resume', resume_id=resume.id) }}"
+                       class="btn btn-secondary"
+                       style="padding: 0.4rem 1rem; font-size: 0.8125rem; border-radius: 8px;">
+                        View
+                    </a>
+
+                    <a href="{{ url_for('auth.delete_resume', resume_id=resume.id) }}"
+                       class="btn btn-secondary"
+                       onclick="return confirm('Are you sure you want to delete this resume?');"
+                       style="padding: 0.4rem 1rem; font-size: 0.8125rem; border-radius: 8px; border-color: rgba(248, 113, 113, 0.2); color: var(--flash-error-text);">
+                        Delete
+                    </a>
+
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+
+{% else %}
+
+    <div class="empty-state">
+
+        <div style="text-align: center;">
+
+            <p style="margin-bottom: 1rem;">
+                No resumes uploaded yet
+            </p>
+
+            <a href="{{ url_for('auth.upload_resume') }}"
+               class="btn btn-secondary"
+               style="font-size: 0.8125rem;">
+                Upload Resume
+            </a>
+
+        </div>
+
+    </div>
+
+{% endif %}
+```
+
+</div>
+
+    
     <section class="card progress-section">
         <div class="progress-header">
             <span class="progress-title">Target Vector Alignment</span>

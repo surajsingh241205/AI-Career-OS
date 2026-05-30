@@ -31,3 +31,7 @@ class User(UserMixin,db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+    
+    resumes = db.relationship(
+        "Resume", backref = "user", lazy= True
+    )

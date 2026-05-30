@@ -4,7 +4,7 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash
+    flash,
 )
 
 from flask_login import (
@@ -21,7 +21,22 @@ from werkzeug.security import (
 
 from app import db
 from app.models.user import User
+import os 
+from werkzeug.utils import secure_filename 
+from app.models.resume import Resume
+from flask import send_file
+from flask import current_app
 
+ALLOWED_EXTENSIONS = {
+    "pdf", "docx"
+}
+
+def allowed_file(filename):
+    return (
+        "." in filename and 
+        filename.rsplit(".", 1)[1].lower()
+        in ALLOWED_EXTENSIONS
+    )
 
 auth = Blueprint(
     "auth",
@@ -124,10 +139,17 @@ def login():
 @auth.route("/dashboard")
 @login_required
 def dashboard():
+    
+    resumes = Resume.query.filter_by(
+        user_id = current_user.id
+    ).order_by(
+        Resume.uploaded_at.desc()
+    ).all()
 
     return render_template(
         "dashboard.html",
-        user=current_user
+        user=current_user,
+        resumes = resumes
     )
 
 
@@ -144,4 +166,144 @@ def logout():
 
     return redirect(
         url_for("auth.login")
+    )
+
+@auth.route("/upload-resume", methods=["GET", "POST"])
+@login_required
+def upload_resume():
+
+    if request.method == "POST":
+
+        file = request.files.get("resume")
+
+        if not file:
+
+            flash(
+                "Please select a file.",
+                "error"
+            )
+
+            return redirect(
+                url_for("auth.upload_resume")
+            )
+
+        if not allowed_file(file.filename):
+
+            flash(
+                "Only PDF and DOCX files are allowed.",
+                "error"
+            )
+
+            return redirect(
+                url_for("auth.upload_resume")
+            )
+
+        filename = secure_filename(
+            file.filename
+        )
+
+        upload_folder = os.path.join(
+            current_app.root_path,
+            "uploads"
+        )
+
+        os.makedirs(
+            upload_folder,
+            exist_ok=True
+        )
+
+        filepath = os.path.join(
+            upload_folder,
+            filename
+        )
+
+        file.save(filepath)
+
+        resume = Resume(
+            file_name=filename,
+            file_path=filepath,
+            user_id=current_user.id
+        )
+
+        db.session.add(resume)
+        db.session.commit()
+
+        flash(
+            "Resume uploaded successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("auth.dashboard")
+        )
+
+    return render_template(
+        "upload_resume.html"
+    )
+
+@auth.route("/resume/<int:resume_id>/view")
+@login_required
+def view_resume(resume_id):
+
+    resume = Resume.query.get_or_404(
+        resume_id
+    )
+
+    if resume.user_id != current_user.id:
+
+        flash(
+            "Access denied.",
+            "error"
+        )
+
+        return redirect(
+            url_for("auth.dashboard")
+        )
+
+    return send_file(
+        resume.file_path,
+        as_attachment=False
+    )
+
+@auth.route("/resume/<int:resume_id>/delete")
+@login_required
+def delete_resume(resume_id):
+
+    resume = Resume.query.get_or_404(
+        resume_id
+    )
+
+    if resume.user_id != current_user.id:
+
+        flash(
+            "Access denied.",
+            "error"
+        )
+
+        return redirect(
+            url_for("auth.dashboard")
+        )
+
+    import os
+
+    if os.path.exists(
+        resume.file_path
+    ):
+        os.remove(
+            resume.file_path
+        )
+
+    db.session.delete(
+        resume
+    )
+
+    db.session.commit()
+
+    flash(
+        "Resume deleted successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for("auth.dashboard")
     )

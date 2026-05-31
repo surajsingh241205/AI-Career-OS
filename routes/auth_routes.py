@@ -26,6 +26,9 @@ from werkzeug.utils import secure_filename
 from app.models.resume import Resume
 from flask import send_file
 from flask import current_app
+from app.services.resume_parser import extract_text
+from app.services.resume_data_extractor import extract_basic_info
+from app.services.resume_data_extractor import (extract_basic_info, extract_skills)
 
 ALLOWED_EXTENSIONS = {
     "pdf", "docx"
@@ -218,7 +221,27 @@ def upload_resume():
         )
 
         file.save(filepath)
-
+        
+        resume_text = extract_text(filepath)
+        resume_data = extract_basic_info(
+            resume_text
+        )
+        skills = extract_skills(
+            resume_text
+        )
+        
+        print("\n===== SKILLS =====\n")
+        print(skills)
+        print("\n==================\n")
+        
+        print("\n===== EXTRACTED DATA =====\n")
+        print(resume_data)
+        print("\n=========================\n")
+        
+        print("\n========== RESUME TEXT ==========\n")
+        print(resume_text[:1000])
+        print("\n===============================\n")
+        
         resume = Resume(
             file_name=filename,
             file_path=filepath,

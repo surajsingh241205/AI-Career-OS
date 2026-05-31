@@ -16,6 +16,10 @@ def create_app():
     app.config.from_object(config)
 
     db.init_app(app)
+    
+    from app.models import User
+    from app.models import Resume
+    from app.models import ResumeAnalysis
 
     migrate.init_app(app, db)
     login_manager.init_app(app) 

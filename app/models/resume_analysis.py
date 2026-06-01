@@ -22,7 +22,14 @@ class ResumeAnalysis(db.Model):
     phone = db.Column(db.String(50))
     skills = db.Column(db.Text)
 
+    score = db.Column(
+    db.Integer,
+    default=0
+    )
+    
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
     )
+    
+    

@@ -31,3 +31,9 @@ class Resume(db.Model):
         db.ForeignKey("users.id"),
         nullable=False
     )
+    
+    analysis = db.relationship(
+        "ResumeAnalysis", backref= "resume", lazy= True, cascade="all, delete"
+    )
+    
+    

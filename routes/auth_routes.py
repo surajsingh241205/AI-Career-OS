@@ -29,6 +29,8 @@ from flask import current_app
 from app.services.resume_parser import extract_text
 from app.services.resume_data_extractor import extract_basic_info
 from app.services.resume_data_extractor import (extract_basic_info, extract_skills)
+from app.models.resume_analysis import ResumeAnalysis
+from app.services.resume_scorer import (calculate_resume_score)
 
 ALLOWED_EXTENSIONS = {
     "pdf", "docx"
@@ -149,11 +151,34 @@ def dashboard():
         Resume.uploaded_at.desc()
     ).all()
 
+    latest_analysis = ResumeAnalysis.query\
+    .join(Resume)\
+    .filter(
+        Resume.user_id == current_user.id
+    )\
+    .order_by(
+        ResumeAnalysis.id.desc()
+    )\
+    .first()
+    
+    resume_score = 0
+    skills_count = 0
+
+    if latest_analysis:
+        resume_score = latest_analysis.score
+    skills_count = len(
+        latest_analysis.skills.split(",")
+    )
+    
     return render_template(
         "dashboard.html",
         user=current_user,
-        resumes = resumes
+        resumes = resumes,
+        resume_score = resume_score,
+        skills_count = skills_count
     )
+    
+    
 
 
 @auth.route("/logout")
@@ -230,6 +255,16 @@ def upload_resume():
             resume_text
         )
         
+        score = calculate_resume_score(
+                resume_data,
+                skills,
+                resume_text
+            )
+
+        print("\n===== RESUME SCORE =====\n")
+        print(score)
+        print("\n========================\n")
+        
         print("\n===== SKILLS =====\n")
         print(skills)
         print("\n==================\n")
@@ -249,6 +284,18 @@ def upload_resume():
         )
 
         db.session.add(resume)
+        db.session.commit()
+        
+        analysis = ResumeAnalysis(
+            resume_id = resume.id, 
+            
+            name = resume_data.get("name"),
+            email = resume_data.get("email"),
+            phone = resume_data.get("phone"),
+            skills = ",".join(skills),
+            score = score
+            )
+        db.session.add(analysis)
         db.session.commit()
 
         flash(
@@ -329,4 +376,26 @@ def delete_resume(resume_id):
 
     return redirect(
         url_for("auth.dashboard")
+    )
+
+@auth.route("/resume-analysis/<int:resume_id>")
+@login_required
+def resume_analysis(resume_id):
+
+    resume = Resume.query.filter_by(
+        id=resume_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    analysis = ResumeAnalysis.query.filter_by(
+        resume_id=resume.id
+    ).first()
+
+    print(analysis)
+    print(analysis.name if analysis else "NO ANALYSIS")
+
+    return render_template(
+        "resume_analysis.html",
+        resume=resume,
+        analysis=analysis
     )

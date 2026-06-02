@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AI Career OS — Optimize Your Professional Trajectory{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             /* Dark Theme (Default) */
@@ -192,7 +194,7 @@
             height: 2.25rem;
             transition: var(--transition);
         }
-        
+
         .theme-toggle:hover {
             background-color: var(--subtle-gray);
             border-color: var(--text-secondary);
@@ -234,7 +236,7 @@
             border-radius: 12px;
             font-size: 0.875rem;
             font-weight: 500;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -270,8 +272,15 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-1rem); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-1rem);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Footer Layout */
@@ -334,43 +343,54 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="flash-wrapper">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
-                        <span>{{ message }}</span>
-                        <button class="flash-close" onclick="this.parentElement.style.opacity='0'; setTimeout(() => this.parentElement.remove(), 300);">&times;</button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+            <span>{{ message }}</span>
+            <button class="flash-close"
+                onclick="this.parentElement.style.opacity='0'; setTimeout(() => this.parentElement.remove(), 300);">&times;</button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
     <nav>
         <div class="container nav-container">
             <a href="{{ url_for('home') if has_url_for else '/' }}" class="logo">AI Career OS</a>
-            
+
             <ul class="nav-menu" id="navMenu">
                 <li><a href="{{ url_for('home') if has_url_for else '/' }}">Home</a></li>
                 <li><a href="{{ url_for('home') if has_url_for else '/' }}#features">Features</a></li>
                 {% if current_user and current_user.is_authenticated %}
-                    <li><a href="{{ url_for('dashboard') if has_url_for else '/dashboard' }}">Dashboard</a></li>
+                <li><a href="{{ url_for('dashboard') if has_url_for else '/dashboard' }}">Dashboard</a></li>
                 {% endif %}
             </ul>
+            <a href="{{ url_for('auth.applications') }}">
+                Applications
+            </a>
 
+            <a href="{{ url_for('auth.upload_resume') }}">
+                Resumes
+            </a>
             <div class="nav-actions">
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle layout theme">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" class="theme-icon">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    </svg>
                 </button>
-                
+
                 {% if current_user and current_user.is_authenticated %}
-                    <a href="{{ url_for('logout') if has_url_for else '/logout' }}" class="btn btn-secondary">Logout</a>
+                <a href="{{ url_for('logout') if has_url_for else '/logout' }}" class="btn btn-secondary">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') if has_url_for else '/login' }}" class="btn btn-secondary">Login</a>
-                    <a href="{{ url_for('register') if has_url_for else '/register' }}" class="btn btn-primary">Register</a>
+                <a href="{{ url_for('login') if has_url_for else '/login' }}" class="btn btn-secondary">Login</a>
+                <a href="{{ url_for('register') if has_url_for else '/register' }}" class="btn btn-primary">Register</a>
                 {% endif %}
 
                 <button class="menu-toggle" id="menuToggle" aria-label="Open mobile menu">
@@ -441,4 +461,5 @@
         }, 5000);
     </script>
 </body>
+
 </html>

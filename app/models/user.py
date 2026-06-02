@@ -35,3 +35,10 @@ class User(UserMixin,db.Model):
     resumes = db.relationship(
         "Resume", backref = "user", lazy= True
     )
+    
+    applications = db.relationship(
+    "JobApplication",
+    backref="user",
+    lazy=True,
+    cascade="all, delete"
+    )

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Application
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h1>Edit Application</h1>
+
+        <form method="POST">
+
+            <p>
+                <strong>
+                    {{ application.company_name }}
+                </strong>
+            </p>
+
+            <p>
+                {{ application.job_title }}
+            </p>
+
+            <div class="form-group">
+
+                <label>Status</label>
+
+                <select name="status">
+
+                    <option value="Applied">
+                        Applied
+                    </option>
+
+                    <option value="Interview">
+                        Interview
+                    </option>
+
+                    <option value="Rejected">
+                        Rejected
+                    </option>
+
+                    <option value="Offer">
+                        Offer
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Update Status
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

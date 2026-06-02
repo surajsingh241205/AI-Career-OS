@@ -278,11 +278,11 @@
     <section class="metrics-grid">
         <div class="card metric-card">
             <div class="metric-label">Applications</div>
-            <div class="metric-value">12</div>
+            <div class="metric-value">{{ applications_count }}</div>
         </div>
         <div class="card metric-card">
             <div class="metric-label">Interviews</div>
-            <div class="metric-value">3</div>
+            <div class="metric-value">{{ interviews_count }}</div>
         </div>
         <div class="card metric-card">
             <div class="metric-label">Resume Score</div>
@@ -373,67 +373,141 @@
     </section>
 
     <div class="console-grid">
-
         <div class="console-panel">
-            <h2 class="panel-title">Recent Activity</h2>
-            <div class="activity-card">
-                <div class="timeline-container">
-                    <div class="timeline-item">
-                        <div class="timeline-dot" style="background-color: var(--text-primary);"></div>
-                        <div class="timeline-content">
-                            <span class="timeline-text">System Initialization Completed</span>
-                            <span class="timeline-timestamp">JUST NOW</span>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <span class="timeline-text">Resume baseline index analyzed (Score: 84)</span>
-                            <span class="timeline-timestamp">2 HOURS AGO</span>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <span class="timeline-text">Added "Senior Frontend Engineer" application status loop</span>
-                            <span class="timeline-timestamp">YESTERDAY</span>
-                        </div>
-                    </div>
+
+            <h2 class="panel-title">
+                Recent Activity
+            </h2>
+
+            {% if activities %}
+
+            <div class="activity-list">
+
+                {% for activity in activities %}
+
+                <div class="activity-item">
+
+                    <p>
+                        {{ activity.message }}
+                    </p>
+
+                    <small>
+                        {{ activity.date.strftime('%d %b %Y %I:%M %p') }}
+                    </small>
+
                 </div>
+
+                {% endfor %}
+
             </div>
 
-            <h2 class="panel-title" style="margin-top: 0.5rem;">AI Career Coach Pipeline</h2>
-            <div class="expansion-placeholder">
-                <p class="expansion-text">Module integration pending system initialization</p>
-            </div>
+            {% else %}
+
+            <p>
+                No activity yet.
+            </p>
+
+            {% endif %}
+
         </div>
 
-        <div class="console-panel">
-            <h2 class="panel-title">Quick Actions</h2>
-            <div class="actions-stack">
-                <a href="#analyze" class="action-link">
-                    <span>Analyze Resume Blueprint</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#interview" class="action-link">
-                    <span>Generate Interview Simulation</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#roadmaps" class="action-link" style="opacity: 0.6;">
-                    <span>Request Skill Roadmap Delta</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </a>
+
+        <h2 class="panel-title" style="margin-top: 0.5rem;">Career Pipeline Analytics</h2>
+        <div class="expansion-placeholder">
+            <div class="console-panel">
+
+                <h2 class="panel-title">
+                    Career Analytics
+                </h2>
+
+                <div class="metrics-grid">
+
+                    <div class="metric-card">
+                        <h4>Applications</h4>
+                        <p>{{ applications_count }}</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <h4>Interviews</h4>
+                        <p>{{ interviews_count }}</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <h4>Rejected</h4>
+                        <p>{{ rejected_count }}</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <h4>Offers</h4>
+                        <p>{{ offer_count }}</p>
+                    </div>
+
+                </div>
+                <div class="console-panel">
+
+                    <h2 class="panel-title">
+                        Performance Metrics
+                    </h2>
+
+                    <div class="metrics-grid">
+
+                        <div class="metric-card">
+
+                            <h4>
+                                Interview Rate
+                            </h4>
+
+                            <p>
+                                {{ interview_rate }}%
+                            </p>
+
+                        </div>
+
+                        <div class="metric-card">
+
+                            <h4>
+                                Success Rate
+                            </h4>
+
+                            <p>
+                                {{ success_rate }}%
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="console-panel">
+        <h2 class="panel-title">Quick Actions</h2>
+        <div class="actions-stack">
+            <a href="#analyze" class="action-link">
+                <span>Analyze Resume Blueprint</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+            <a href="#interview" class="action-link">
+                <span>Generate Interview Simulation</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+            <a href="#roadmaps" class="action-link" style="opacity: 0.6;">
+                <span>Request Skill Roadmap Delta</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
 </div>
 {% endblock %}

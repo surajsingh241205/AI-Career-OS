@@ -31,6 +31,8 @@ from app.services.resume_data_extractor import extract_basic_info
 from app.services.resume_data_extractor import (extract_basic_info, extract_skills)
 from app.models.resume_analysis import ResumeAnalysis
 from app.services.resume_scorer import (calculate_resume_score)
+from app.models.job_application import JobApplication
+from datetime import datetime
 
 ALLOWED_EXTENSIONS = {
     "pdf", "docx"
@@ -170,12 +172,113 @@ def dashboard():
         latest_analysis.skills.split(",")
     )
     
+    resumes = Resume.query.filter_by(
+    user_id=current_user.id
+    ).all()
+
+    applications_count = JobApplication.query.filter_by(
+    user_id=current_user.id
+    ).count()
+
+    interviews_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Interview"
+    ).count()
+
+    rejected_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Rejected"
+    ).count()
+
+    offer_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Offer"
+    ).count()
+
+    interview_rate = 0
+    success_rate = 0
+
+    if applications_count > 0:
+
+        interview_rate = round(
+            (interviews_count / applications_count) * 100
+        )
+
+    success_rate = round(
+        (offer_count / applications_count) * 100
+    )
+
+    latest_analysis = ResumeAnalysis.query\
+    .join(Resume)\
+    .filter(
+        Resume.user_id == current_user.id
+    )\
+    .order_by(
+        ResumeAnalysis.id.desc()
+    )\
+    .first()
+
+    resume_score = 0
+    skills_count = 0
+
+    if latest_analysis:
+
+        resume_score = latest_analysis.score
+
+    if latest_analysis.skills:
+        skills_count = len(
+            latest_analysis.skills.split(",")
+        )
+        
+    resume_activities = []
+
+    for resume in resumes:
+
+        resume_activities.append({
+        "type": "resume",
+        "message": f"Uploaded resume: {resume.file_name}",
+        "date": resume.uploaded_at
+    })
+        
+    applications = JobApplication.query.filter_by(
+    user_id=current_user.id
+    ).all()
+
+    application_activities = []
+
+    for app in applications:
+
+        application_activities.append({
+        "type": "application",
+        "message": f"Applied to {app.company_name} - {app.job_title}",
+        "date": app.created_at
+    })
+        
+    activities = (
+    resume_activities +
+    application_activities
+    )
+
+    activities.sort(
+    key=lambda x: x["date"],
+    reverse=True
+)
+
+    activities = activities[:5]
+    
     return render_template(
         "dashboard.html",
         user=current_user,
         resumes = resumes,
         resume_score = resume_score,
-        skills_count = skills_count
+        skills_count = skills_count,
+        applications_count = applications_count,
+        interviews_count = interviews_count,
+        rejected_count=rejected_count,
+        offer_count=offer_count,
+        interview_rate=interview_rate,
+        success_rate=success_rate,
+        activities = activities
     )
     
     
@@ -398,4 +501,157 @@ def resume_analysis(resume_id):
         "resume_analysis.html",
         resume=resume,
         analysis=analysis
+    )
+    
+@auth.route("/add-application", methods=["GET", "POST"])
+@login_required
+def add_application():
+
+    if request.method == "POST":
+
+        company_name = request.form.get(
+            "company_name"
+        )
+
+        job_title = request.form.get(
+            "job_title"
+        )
+
+        status = request.form.get(
+            "status"
+        )
+
+        applied_date = request.form.get(
+            "applied_date"
+        )
+
+        application = JobApplication(
+
+            company_name=company_name,
+
+            job_title=job_title,
+
+            status=status,
+
+            applied_date=datetime.strptime(
+                applied_date,
+                "%Y-%m-%d"
+            ).date(),
+
+            user_id=current_user.id
+        )
+
+        db.session.add(application)
+        db.session.commit()
+
+        flash(
+            "Application added successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("auth.applications")
+        )
+
+    return render_template(
+        "add_application.html"
+    )
+
+@auth.route("/applications")
+@login_required
+def applications():
+
+    applications = JobApplication.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        JobApplication.id.desc()
+    ).all()
+
+    applied_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Applied"
+    ).count()
+
+    interview_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Interview"
+    ).count()
+
+    rejected_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Rejected"
+    ).count()
+
+    offer_count = JobApplication.query.filter_by(
+    user_id=current_user.id,
+    status="Offer"
+    ).count()
+
+    return render_template(
+        "applications.html",
+        applications=applications,
+        applied_count=applied_count,
+        interview_count=interview_count,
+        rejected_count=rejected_count,
+        offer_count=offer_count
+    )
+    
+@auth.route(
+    "/application/<int:application_id>/edit",
+    methods=["GET", "POST"]
+)
+@login_required
+def edit_application(application_id):
+
+    application = JobApplication.query.filter_by(
+        id=application_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    if request.method == "POST":
+
+        application.status = request.form.get(
+            "status"
+        )
+
+        db.session.commit()
+
+        flash(
+            "Application updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("auth.applications")
+        )
+
+    return render_template(
+        "edit_application.html",
+        application=application
+    )
+
+@auth.route(
+    "/application/<int:application_id>/delete"
+)
+@login_required
+def delete_application(application_id):
+
+    application = JobApplication.query.filter_by(
+        id=application_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    db.session.delete(
+        application
+    )
+
+    db.session.commit()
+
+    flash(
+        "Application deleted successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for("auth.applications")
     )

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add Application - AI Career OS
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h1 class="auth-title">
+            Add Application
+        </h1>
+
+        <p class="auth-subtitle">
+            Track a new job application
+        </p>
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label>
+                    Company Name
+                </label>
+
+                <input type="text" name="company_name" required placeholder="Google">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Job Title
+                </label>
+
+                <input type="text" name="job_title" required placeholder="Software Engineer">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Status
+                </label>
+
+                <select name="status" required>
+
+                    <option value="Applied">
+                        Applied
+                    </option>
+
+                    <option value="Interview">
+                        Interview
+                    </option>
+
+                    <option value="Rejected">
+                        Rejected
+                    </option>
+
+                    <option value="Offer">
+                        Offer
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Applied Date
+                </label>
+
+                <input type="date" name="applied_date" required>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Add Application
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
